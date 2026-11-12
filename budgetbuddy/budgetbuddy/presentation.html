@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BudgetBuddy — 8-Slide Project Presentation</title>
+  <style>
+    :root {
+      --ink: #1c2b23;
+      --paper: #f6f4ee;
+      --ledger-green: #16382c;
+      --ledger-green-light: #23503f;
+      --gold: #c99a3b;
+      --gold-soft: #e9d6a8;
+      --danger: #a4342a;
+      --line: #d8d2c2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111e18;
+      color: var(--ink);
+      font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Top Controls Bar */
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1080px;
+      margin-bottom: 12px;
+      color: var(--gold-soft);
+      font-size: 0.9rem;
+    }
+
+    .deck-controls .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .deck-btn {
+      background: var(--ledger-green-light);
+      color: var(--paper);
+      border: 1px solid var(--gold);
+      padding: 6px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .deck-btn:hover {
+      background: var(--gold);
+      color: var(--ledger-green);
+    }
+
+    /* 16:9 Presentation Stage */
+    .slide-viewport {
+      width: 100%;
+      max-width: 1080px;
+      aspect-ratio: 16 / 9;
+      background: var(--paper);
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--gold);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: scale(0.98);
+      background: var(--paper);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    /* Slide Header & Footer */
+    .slide-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 28px;
+      background: var(--ledger-green);
+      color: var(--paper);
+      border-bottom: 3px solid var(--gold);
+    }
+
+    .slide-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+    }
+
+    .slide-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--ledger-green);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .slide-tag {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .slide-body {
+      flex: 1;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .slide-heading {
+      margin-bottom: 16px;
+    }
+
+    .slide-heading h2 {
+      font-size: 1.5rem;
+      color: var(--ledger-green);
+      font-weight: 700;
+    }
+
+    .slide-heading p {
+      font-size: 0.9rem;
+      color: #60665d;
+      margin-top: 4px;
+    }
+
+    .slide-footer {
+      padding: 8px 32px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: #7a766a;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Title Slide (Slide 1 & Slide 8 Special) */
+    .slide-hero {
+      background: var(--ledger-green);
+      color: var(--paper);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+      position: relative;
+    }
+
+    .slide-hero::before {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border: 2px solid var(--gold);
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    .slide-hero::after {
+      content: "";
+      position: absolute;
+      inset: 26px;
+      border: 1px dashed var(--gold-soft);
+      border-radius: 6px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .hero-mark {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: var(--ledger-green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-title {
+      font-size: 2.6rem;
+      color: var(--gold-soft);
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      margin-top: 8px;
+      color: var(--paper);
+      opacity: 0.9;
+    }
+
+    .hero-divider {
+      width: 120px;
+      height: 3px;
+      background: var(--gold);
+      margin: 18px auto;
+    }
+
+    .hero-tags {
+      font-size: 0.9rem;
+      color: var(--gold-soft);
+      font-weight: 500;
+    }
+
+    .hero-meta {
+      margin-top: 36px;
+      font-size: 0.8rem;
+      opacity: 0.75;
+    }
+
+    /* Grids & Cards for Content Slides */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+
+    .content-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .content-card.danger-card {
+      border-top: 4px solid var(--danger);
+    }
+
+    .content-card.green-card {
+      border-top: 4px solid var(--ledger-green);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ledger-green);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .content-card ul {
+      list-style: none;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .content-card ul li {
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 14px;
+    }
+
+    .content-card ul li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+      font-weight: bold;
+    }
+
+    /* Swatches for Slide 3 */
+    .color-block {
+      height: 60px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* Flowchart steps for Slide 7 */
+    .flow-step {
+      background: #fff;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-num {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .flow-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ledger-green);
+      margin-bottom: 6px;
+    }
+
+    .flow-desc {
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    /* Bottom Navigator Dots */
+    .deck-nav {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(201, 154, 59, 0.3);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dot.active {
+      background: var(--gold);
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls Header -->
+  <div class="deck-controls">
+    <div style="font-weight: 600;">
+      Slide <span id="current-num">1</span> of 8 &bull; BudgetBuddy Architecture Deck
+    </div>
+    <div class="btn-group">
+      <button class="deck-btn" id="prev-btn" onclick="prevSlide()">&#8592; Prev</button>
+      <button class="deck-btn" id="next-btn" onclick="nextSlide()">Next &#8594;</button>
+      <a href="BudgetBuddy_Presentation.pptx" download class="deck-btn" style="text-decoration:none;">Download .PPTX</a>
+    </div>
+  </div>
+
+  <!-- 16:9 Viewport -->
+  <div class="slide-viewport">
+
+    <!-- SLIDE 1: Title & Cover -->
+    <div class="slide slide-hero active" id="slide-1">
+      <div class="hero-mark">₹</div>
+      <h1 class="hero-title">BudgetBuddy</h1>
+      <p class="hero-subtitle">Classical Ledger Personal Finance &amp; Expense Tracker</p>
+      <div class="hero-divider"></div>
+      <p class="hero-tags">Vintage Bookkeeping Aesthetics &bull; Local-First Privacy &bull; Zero-Dependency Architecture</p>
+      <p class="hero-meta">Frontend Web Engineering Project &bull; Comprehensive Project Presentation</p>
+    </div>
+
+    <!-- SLIDE 2: Problem Statement & Vision -->
+    <div class="slide" id="slide-2">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">Context &amp; Motivation</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>The Problem &amp; The BudgetBuddy Vision</h2>
+          <p>Rethinking modern digital finance through a tactile, privacy-centric lens.</p>
+        </div>
+        <div class="grid-2">
+          <div class="content-card danger-card">
+            <div class="card-title" style="color:var(--danger)">⚠ THE CHALLENGES TODAY</div>
+            <ul>
+              <li><strong>Bloated SaaS Apps:</strong> Over-engineered with invasive ads, upsells, and cluttered dashboards.</li>
+              <li><strong>Privacy Vulnerabilities:</strong> Mandatory cloud sign-ups expose intimate household spending patterns.</li>
+              <li><strong>Sterile Aesthetics:</strong> Generic neon cards and corporate UI alienate users from intentional bookkeeping.</li>
+              <li><strong>High Friction:</strong> Multi-screen flows and network lag slow down rapid daily transaction recording.</li>
+            </ul>
+          </div>
+          <div class="content-card green-card">
+            <div class="card-title">✦ THE BudgetBuddy SOLUTION</div>
+            <ul>
+              <li><strong>Classical Ledger Nostalgia:</strong> Deep forest greens and warm parchment celebrate the calm of physical journals.</li>
+              <li><strong>100% Local-First Privacy:</strong> Data never leaves browser storage; zero external tracking or telemetry.</li>
+              <li><strong>Sub-Millisecond Speed:</strong> Frictionless single-page recording with instant financial totals.</li>
+              <li><strong>Multi-Account Structure:</strong> Dedicated ledgers for Personal, Business, and Household budgets.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 2 of 8</span>
+        <span>Context &amp; Vision</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Visual Identity & Design System -->
+    <div class="slide" id="slide-3">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">Design System</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>Visual Identity &amp; Ledger Aesthetics</h2>
+          <p>Color theory and typography tailored to create an atmosphere of monetary discipline and trust.</p>
+        </div>
+        <div class="grid-4">
+          <div class="content-card">
+            <div class="color-block" style="background:var(--ledger-green); color:var(--gold-soft);">#16382C</div>
+            <div class="card-title">Ledger Green</div>
+            <p style="font-size:0.78rem; color:#555;">Primary topbar and stat card fill. Evokes stability, heritage, and fiscal balance.</p>
+          </div>
+          <div class="content-card">
+            <div class="color-block" style="background:var(--gold); color:var(--ledger-green);">#C99A3B</div>
+            <div class="card-title">Warm Gold</div>
+            <p style="font-size:0.78rem; color:#555;">Rupee insignia, button highlights, budget gauges, and active input boundaries.</p>
+          </div>
+          <div class="content-card">
+            <div class="color-block" style="background:var(--paper); color:var(--ink); border:1px solid var(--line);">#F6F4EE</div>
+            <div class="card-title">Parchment Paper</div>
+            <p style="font-size:0.78rem; color:#555;">Warm off-white background that reduces ocular fatigue and recalls antique book paper.</p>
+          </div>
+          <div class="content-card">
+            <div class="color-block" style="background:var(--danger); color:#fff;">#A4342A</div>
+            <div class="card-title">Ledger Crimson</div>
+            <p style="font-size:0.78rem; color:#555;">Negative cashflow typography, item deletion cues, and budget deficit warnings.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 3 of 8</span>
+        <span>Aesthetic Framework</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Architecture & Tech Stack -->
+    <div class="slide" id="slide-4">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">Technical Blueprint</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>Architecture &amp; Zero-Dependency Stack</h2>
+          <p>Lightweight, resilient frontend architecture running natively in all modern browsers.</p>
+        </div>
+        <div class="grid-3">
+          <div class="content-card green-card">
+            <div class="card-title">1. Presentation Layer</div>
+            <ul>
+              <li><strong>Semantic HTML5:</strong> Accessible form controls, sectioning roots, and structured lists.</li>
+              <li><strong>CSS Custom Properties:</strong> Centralized design tokens (<code>:root</code>) for themes.</li>
+              <li><strong>CSS Grid Layout:</strong> Proportional columns (<code>1.1fr 1.1fr 1.4fr</code>) with responsive mobile stacking.</li>
+            </ul>
+          </div>
+          <div class="content-card green-card">
+            <div class="card-title">2. React 19 Component Layer</div>
+            <ul>
+              <li><strong>Declarative UI:</strong> React 19 components with <code>useState</code> &amp; <code>useMemo</code>.</li>
+              <li><strong>Budget Simulator:</strong> Real-time "what-if" projection sliders with dynamic thresholds.</li>
+              <li><strong>Quick Logger:</strong> Instant transaction insertion syncing directly to browser storage.</li>
+            </ul>
+          </div>
+          <div class="content-card green-card">
+            <div class="card-title">3. Data &amp; Runtime</div>
+            <ul>
+              <li><strong>HTML5 LocalStorage:</strong> Instant document store organized across accounts.</li>
+              <li><strong>Embedded Node.js Server:</strong> Zero-dependency HTTP daemon with strict path sanitization.</li>
+              <li><strong>Zero Cloud Reliance:</strong> 100% operational offline without internet.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 4 of 8</span>
+        <span>System Architecture</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Core Features & Capabilities -->
+    <div class="slide" id="slide-5">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">User Capabilities</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>Feature Matrix &amp; Ledger Capabilities</h2>
+          <p>Everything required for comprehensive, day-to-day household and business bookkeeping.</p>
+        </div>
+        <div class="grid-3">
+          <div class="content-card">
+            <div class="card-title">📝 Expense Logging</div>
+            <p style="font-size:0.8rem; color:#555;">Rapid logging with title, amount in ₹, category classification, and native calendar integration.</p>
+          </div>
+          <div class="content-card">
+            <div class="card-title">📊 Dynamic Budgeting</div>
+            <p style="font-size:0.8rem; color:#555;">Real-time progress gauge calculating percentage spent with instant crimson alert on limit exceed.</p>
+          </div>
+          <div class="content-card">
+            <div class="card-title">🏛️ Multi-Account Ledgers</div>
+            <p style="font-size:0.8rem; color:#555;">Independent ledgers for Personal, Business, and Household finances with distinct budgets.</p>
+          </div>
+          <div class="content-card">
+            <div class="card-title">⏰ Bill &amp; Due Reminders</div>
+            <p style="font-size:0.8rem; color:#555;">Integrated checklist for utilities and recurring EMIs with interactive strike-through toggle.</p>
+          </div>
+          <div class="content-card">
+            <div class="card-title">🔍 Category Filter</div>
+            <p style="font-size:0.8rem; color:#555;">One-click isolation of expenses by Groceries, Food, Utilities, Transport, Shopping, or Health.</p>
+          </div>
+          <div class="content-card">
+            <div class="card-title">💾 Persistent Storage</div>
+            <p style="font-size:0.8rem; color:#555;">Transparent state syncing to browser storage with automatic realistic seed data on first run.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 5 of 8</span>
+        <span>Feature Overview</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: 3-Column Layout & UX Anatomy -->
+    <div class="slide" id="slide-6">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">Interface Anatomy</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>3-Column Layout &amp; Responsive UX</h2>
+          <p>A balanced tripartite workspace designed for simultaneous entry, overview, and inspection.</p>
+        </div>
+        <div class="grid-3">
+          <div class="content-card green-card">
+            <div style="font-size:0.75rem; color:var(--gold); font-weight:700;">COL 1 (1.1fr)</div>
+            <div class="card-title">Overview &amp; Guardrails</div>
+            <ul>
+              <li><strong>Stat Card:</strong> Total outflow formatted in gold with active transaction count.</li>
+              <li><strong>Budget Gauge:</strong> Live progress bar with surplus/deficit feedback.</li>
+              <li><strong>Reminders:</strong> Due bill checklist with interactive checkmarks.</li>
+            </ul>
+          </div>
+          <div class="content-card green-card">
+            <div style="font-size:0.75rem; color:var(--gold); font-weight:700;">COL 2 (1.1fr)</div>
+            <div class="card-title">Rapid Entry Form</div>
+            <ul>
+              <li><strong>Focused Input:</strong> Title input with autofocus for swift transaction logging.</li>
+              <li><strong>Form Row:</strong> Numeric currency amount alongside category selector.</li>
+              <li><strong>Calendar:</strong> Automatically defaults to today's date.</li>
+            </ul>
+          </div>
+          <div class="content-card green-card">
+            <div style="font-size:0.75rem; color:var(--gold); font-weight:700;">COL 3 (1.4fr)</div>
+            <div class="card-title">The Ledger Stream</div>
+            <ul>
+              <li><strong>Sorted Feed:</strong> Chronological order with category badges.</li>
+              <li><strong>Actions:</strong> Category filter dropdown alongside Reset control.</li>
+              <li><strong>Inline Delete:</strong> Immediate entry removal with auto-recalculation.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 6 of 8</span>
+        <span>UX Architecture</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Technical Flow & Data Lifecycle -->
+    <div class="slide" id="slide-7">
+      <div class="slide-topbar">
+        <div class="slide-brand"><span class="slide-mark">₹</span> BudgetBuddy</div>
+        <div class="slide-tag">System Mechanics</div>
+      </div>
+      <div class="slide-body">
+        <div class="slide-heading">
+          <h2>Data Flow Lifecycle &amp; Security Guarantees</h2>
+          <p>Deterministic state management with zero background network traffic.</p>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; margin-bottom:16px;">
+          <div class="flow-step">
+            <div class="flow-num">01</div>
+            <div class="flow-title">User Input</div>
+            <div class="flow-desc">Title, amount, date &amp; category in Form</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">02</div>
+            <div class="flow-title">Validation</div>
+            <div class="flow-desc">Enforce positive numbers &amp; valid dates</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">03</div>
+            <div class="flow-title">State Mutation</div>
+            <div class="flow-desc">Prepends entry into current account array</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">04</div>
+            <div class="flow-title">Storage Sync</div>
+            <div class="flow-desc">Serializes updated store to localStorage</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-num">05</div>
+            <div class="flow-title">Re-Render</div>
+            <div class="flow-desc">Updates totals, budget meter &amp; feed</div>
+          </div>
+        </div>
+        <div class="content-card" style="background:var(--ledger-green); color:var(--paper); border:1px solid var(--gold);">
+          <div style="color:var(--gold-soft); font-weight:700; font-size:0.85rem; margin-bottom:4px;">PRIVACY &amp; INTEGRITY PRINCIPLES</div>
+          <p style="font-size:0.8rem; line-height:1.4; opacity:0.9;">
+            &bull; <strong>Zero External Telemetry:</strong> No tracking cookies, third-party analytics, or remote API calls.<br>
+            &bull; <strong>Graceful Resilience:</strong> Automatically recovers from invalid cache; preloads realistic sample data on cold start.<br>
+            &bull; <strong>Air-Gap Ready:</strong> Fully operational without internet access.
+          </p>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>BudgetBuddy — Classical Ledger Personal Finance &bull; Slide 7 of 8</span>
+        <span>Technical Flow</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Future Roadmap & Conclusion -->
+    <div class="slide slide-hero" id="slide-8">
+      <h2 style="font-size:2rem; color:var(--gold-soft); margin-bottom:14px;">Future Roadmap &amp; Conclusion</h2>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; max-width:850px; margin-bottom:20px;">
+        <div style="background:var(--ledger-green-light); border:1px solid var(--gold); border-radius:8px; padding:12px; text-align:left;">
+          <div style="color:var(--gold-soft); font-weight:700; font-size:0.85rem; margin-bottom:6px;">Phase 1: Analytics</div>
+          <p style="font-size:0.75rem; color:var(--paper); line-height:1.4;">&bull; PDF statement export<br>&bull; CSV/Excel download<br>&bull; SVG category breakdown charts</p>
+        </div>
+        <div style="background:var(--ledger-green-light); border:1px solid var(--gold); border-radius:8px; padding:12px; text-align:left;">
+          <div style="color:var(--gold-soft); font-weight:700; font-size:0.85rem; margin-bottom:6px;">Phase 2: Automation</div>
+          <p style="font-size:0.75rem; color:var(--paper); line-height:1.4;">&bull; Recurring bill automations<br>&bull; Auto-categorization rules<br>&bull; Multi-currency toggle</p>
+        </div>
+        <div style="background:var(--ledger-green-light); border:1px solid var(--gold); border-radius:8px; padding:12px; text-align:left;">
+          <div style="color:var(--gold-soft); font-weight:700; font-size:0.85rem; margin-bottom:6px;">Phase 3: Secure Sync</div>
+          <p style="font-size:0.75rem; color:var(--paper); line-height:1.4;">&bull; E2E Encrypted cloud backup<br>&bull; WebCrypto master password<br>&bull; Progressive Web App (PWA)</p>
+        </div>
+      </div>
+      <div style="background:var(--paper); color:var(--ink); padding:14px 24px; border-radius:8px; max-width:700px; border:1px solid var(--gold); font-size:0.85rem; line-height:1.4;">
+        <strong>Conclusion:</strong> BudgetBuddy demonstrates that intentional, bespoke craftsmanship paired with lean vanilla web engineering delivers software that is faster, safer, and far more delightful than bloated SaaS platforms.
+        <div style="margin-top:6px; font-weight:700; color:var(--ledger-green);">Thank You! &bull; Questions &amp; Discussion</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dot Indicators -->
+  <div class="deck-nav" id="dots-container"></div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    const dotsContainer = document.getElementById('dots-container');
+    for (let i = 1; i <= totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === 1 ? 'active' : ''}`;
+      dot.onclick = () => goToSlide(i);
+      dotsContainer.appendChild(dot);
+    }
+
+    function updateDeck() {
+      for (let i = 1; i <= totalSlides; i++) {
+        const slide = document.getElementById(`slide-${i}`);
+        if (slide) slide.classList.toggle('active', i === currentSlide);
+      }
+      document.getElementById('current-num').textContent = currentSlide;
+
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx + 1 === currentSlide);
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateDeck();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateDeck();
+      }
+    }
+
+    function goToSlide(n) {
+      currentSlide = n;
+      updateDeck();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+  </script>
+</body>
+</html>

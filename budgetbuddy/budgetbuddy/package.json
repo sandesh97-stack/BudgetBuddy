@@ -1,0 +1,16 @@
+{
+  "name": "budgetbuddy",
+  "version": "1.0.0",
+  "description": "BudgetBuddy — Classical Ledger Personal Finance & Expense Tracker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:react": "node build_browser_react.js",
+    "generate-ppt": "node generate_ppt.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
